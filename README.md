@@ -5,7 +5,38 @@ Crobi's RPG Card generator can be found [here](https://crobi.github.io/rpg-cards
 
 # Basic Usage
 1. Place 5e tools spell source json files into the master_spell folder.
-2. Place 5e tools spell list json in the root folder and keep it names spells-sublist.json
+File should look a bit like this
+```json
+{
+"spell": [
+    {
+        "name": "spells go here"
+    }
+]
+}
+```
+2. Place 5e tools spell list json in the root folder and keep it names spells-sublist.json. File should look like this
+```json
+{
+	"items": [
+		{
+			"h": "adamantine%20bones_bols%203pp"
+		},
+		{
+			"h": "acid%20splash_phb"
+		},
+		{
+			"h": "beast%20sense_phb"
+		}
+	],
+	"sources": [
+		"BoLS 3pp",
+		"PHB"
+	]
+}
+```
+![how to get json spell list](json-spell-download.PNG)
+
 3. enter the command `python tool.py` on a command line in the root directory
 
 # Advanced Usage

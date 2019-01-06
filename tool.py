@@ -20,6 +20,14 @@ schoolMap = {
     "T": "Transmutation",
 }
 
+metaSource = {}
+
+def removeToolCommonMacros(entry):
+    return re.sub(r"{@\w+ *([^|}]+)[|]*[^}]*}", r"\1", entry)
+
+def removeToolScaleMacro(entry):
+    return re.sub(r"{@\w+ *([^|}]+)[|]*[^}]*[|]([^|}]+)}", r"\2", entry)
+
 def getSchoolName(jsonSpell):
     # handle school
     if jsonSpell["school"] in schoolMap:
@@ -148,20 +156,42 @@ def getCasterArray(jsonSpell):
     return arr
 
 def getSource(jsonSpell):
-    return "TODO"
+    if "source" in jsonSpell:
+        source = jsonSpell["source"]
+
+        # check if in meta source
+        if source in metaSource:
+            source = metaSource[source]
+
+        # add page number if available
+        if "page" in jsonSpell:
+            return "Page " + str(jsonSpell["page"]) + " of " + source
+        else:
+            return source.upper()
+
+    return "UNKNOWN"
 
 def getEntries(jsonSpell):
     lines = []
     for entry in jsonSpell["entries"]:
         if type(entry) is str:
-            lines += [re.sub(r"{@\w+ *([^|}]+)[|]*[^}]*}", r"\1", entry)]
+            lines += [removeToolCommonMacros(entry)]
         else:
             lines += ["Refer to book for full details."]
 
     return lines
 
 def getHigherLevel(jsonSpell):
-    return "TODO"
+    lines = []
+    if "entriesHigherLevel" in jsonSpell:
+        for hl in jsonSpell["entriesHigherLevel"]:
+            for entry in hl["entries"]:
+                if type(entry) is str:
+                    entry = removeToolScaleMacro(entry)
+                    lines += [removeToolCommonMacros(entry)]
+                else:
+                    lines += ["Refer to book for full details."]
+    return lines
 
 def getCasterLine(cArr):
     # handle single case
@@ -191,7 +221,19 @@ def getCasterLine(cArr):
 def getSpellJsonTool(fileName, selectedSpells):
     with open(fileName, "r") as myfile:
         data = json.load(myfile)
-        spells = data["spell"]
+        # register meta source
+        if "_meta" in data:
+            if "sources" in data["_meta"]:
+                for dms in data["_meta"]["sources"]:
+                    if "json" in dms and "full" in dms:
+                        metaSource[dms["json"]] = dms["full"]
+
+        # get spells from data
+        if "spell" in data:
+            spells = data["spell"]
+        else:
+            print("ERROR: no spell data found in " + fileName)
+            return []
         totalList = []
 
         for jsonSpell in spells:
@@ -272,14 +314,15 @@ class spell5:
             data["contents"] += ["text | " + entry]
 
         # add higher level
-        if self.higherLevel:
+        if self.higherLevel and len(self.higherLevel) > 0:
             data["contents"] += [
                 "fill | 3",
                 "section | At higher levels",
-                "text | " + self.higherLevel,
             ]
+            for entry in self.higherLevel:
+                data["contents"] += ["text | " + entry]
         
-        data["tags"] = ["spell"] + ["level " + self.level, self.school.lower()]
+        data["tags"] = ["spell"] + self.casters + ["level " + self.level, self.school.lower()]
         return data
 
 # MAIN PROGRAM #
@@ -346,10 +389,13 @@ def saveSelectedSpellsAsCard(sourceFolderName, itemFileName, cardFileName):
     spellList = []
     spellsToGet = readSpellsToGet(itemFileName)
     for file in os.listdir("./" + sourceFolderName):
+        if file.endswith(".json") == False:
+            continue
         print("reading " + file)
+
+        # get spell json
         jsonData = getSpellJsonTool(sourceFolderName + "/" + file, spellsToGet)
         spellList += jsonData
-        print("spell list is now " + str(len(spellList)))
 
     # save spell json
     os.makedirs("output", exist_ok=True)

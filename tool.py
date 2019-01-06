@@ -37,8 +37,8 @@ def getSchoolName(jsonSpell):
     return "Unknown"
 
 def getSubtitle(jsonSpell):
-    if jsonSpell["level"] == "0":
-        return jsonSpell["school"] + " cantrip"
+    if jsonSpell["level"] == 0:
+        return getSchoolName(jsonSpell) + " cantrip"
     else:
         return "Level " + str(jsonSpell["level"]) + " " + getSchoolName(jsonSpell)
 
@@ -322,7 +322,9 @@ class spell5:
             for entry in self.higherLevel:
                 data["contents"] += ["text | " + entry]
         
-        data["tags"] = ["spell"] + self.casters + ["level " + self.level, self.school.lower()]
+        data["tags"] = ["spell"] + ["level " + self.level, self.school.lower()]
+        for caster in self.casters:
+            data["tags"] += [caster.lower()]
         return data
 
 # MAIN PROGRAM #
@@ -353,8 +355,10 @@ def main():
     print("Source from folder <" + sourceFolderName + ">")
     if useItemFolder:
         print("Items from folder <" + itemFolderName + ">")
-        for ifn in os.listdir("./" + itemFolderName):
-            saveSelectedCards(sourceFolderName, itemFolderName + "/" + ifn)
+        for file in os.listdir("./" + itemFolderName):
+            if file.endswith(".json") == False:
+                continue
+            saveSelectedCards(sourceFolderName, itemFolderName + "/" + file)
     else:
         print("Items from file <" + itemFileName + ">")
         saveSelectedCards(sourceFolderName, itemFileName)

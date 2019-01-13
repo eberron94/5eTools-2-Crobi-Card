@@ -142,26 +142,25 @@ def getDuration(jsonSpell):
 def getCasterArray(jsonSpell):
     arr = []
     # handle main class
-    mainList = jsonSpell["classes"]["fromClassList"]
+    if "classes" in jsonSpell:
+        if "fromClassList" in jsonSpell["classes"]
+            mainList = jsonSpell["classes"]["fromClassList"]
+            for c in mainList:
+                if c["source"] in validClassSources:
+                    arr += [c["name"]]
 
-    for c in mainList:
-        if c["source"] in validClassSources:
-            arr += [c["name"]]
+        if "fromSubclass" in jsonSpell["classes"]:
+            # handle subclass
+            subList = jsonSpell["classes"]["fromSubclass"]
 
-    if "fromSubclass" not in jsonSpell["classes"]:
-        return arr
-
-    # handle subclass
-    subList = jsonSpell["classes"]["fromSubclass"]
-
-    for c in subList:
-        ccc = c["class"]
-        csc = c["subclass"]
-        if ccc["source"] in validClassSources and csc["source"] in validClassSources:
-            if "subSubclass" in csc:
-                arr += [ccc["name"] + "-" + csc["name"] + "-" + csc["subSubclass"]]
-            else:
-                arr += [ccc["name"] + "-" + csc["name"]]
+            for c in subList:
+                ccc = c["class"]
+                csc = c["subclass"]
+                if ccc["source"] in validClassSources and csc["source"] in validClassSources:
+                    if "subSubclass" in csc:
+                        arr += [ccc["name"] + "-" + csc["name"] + "-" + csc["subSubclass"]]
+                    else:
+                        arr += [ccc["name"] + "-" + csc["name"]]
 
     return arr
 
@@ -204,6 +203,10 @@ def getHigherLevel(jsonSpell):
     return lines
 
 def getCasterLine(cArr):
+    # handle empty case
+    if len(cArr) == 0:
+        return ""
+
     # handle single case
     if len(cArr) == 1:
         return cArr[0]

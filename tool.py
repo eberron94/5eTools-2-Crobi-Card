@@ -28,6 +28,16 @@ def removeToolCommonMacros(entry):
 def removeToolScaleMacro(entry):
     return re.sub(r"{@\w+ *([^|}]+)[|]*[^}]*[|]([^|}]+)}", r"\2", entry)
 
+def getSpellName(jsonSpell):
+    # handle base name
+    name = jsonSpell["name"]
+
+    if "meta" in jsonSpell:
+        if "ritual" in jsonSpell["meta"] and jsonSpell["meta"]["ritual"] == True:
+            name += " (Ritual)"
+    
+    return name
+
 def getSchoolName(jsonSpell):
     # handle school
     if jsonSpell["school"] in schoolMap:
@@ -255,7 +265,7 @@ def getSpellJsonTool(fileName, selectedSpells):
 
             print("working on " + jsonSpell["name"])
             spell = spell5()
-            spell.name = jsonSpell["name"]
+            spell.name = getSpellName(jsonSpell)
             spell.subtitle = getSubtitle(jsonSpell)
             spell.level = str(jsonSpell["level"])
             spell.school = getSchoolName(jsonSpell)

@@ -143,7 +143,7 @@ def getCasterArray(jsonSpell):
     arr = []
     # handle main class
     if "classes" in jsonSpell:
-        if "fromClassList" in jsonSpell["classes"]
+        if "fromClassList" in jsonSpell["classes"]:
             mainList = jsonSpell["classes"]["fromClassList"]
             for c in mainList:
                 if c["source"] in validClassSources:
@@ -232,7 +232,7 @@ def getCasterLine(cArr):
     return line
 
 def getSpellJsonTool(fileName, selectedSpells):
-    with open(fileName, "r") as myfile:
+    with open(fileName, "r", encoding="utf8") as myfile:
         data = json.load(myfile)
         # register meta source
         if "_meta" in data:
@@ -313,11 +313,11 @@ class spell5:
         data["contents"] = [
             "subtitle | " + self.subtitle,
             "rule",
-            "property | Casting time | " + self.time,
-            "property | Range | " + self.range,
-            "property | Duration | " + self.duration,
+            "property | Casting time | " + self.time.title(),
+            "property | Range | " + self.range.title(),
+            "property | Duration | " + self.duration.title(),
             "property | Components | " + self.components,
-            "property | Class | " + getCasterLine(self.casters),
+            "property | Class | " + getCasterLine(self.casters).title(),
             "property | Source | " + self.source,
             "rule",
         ]

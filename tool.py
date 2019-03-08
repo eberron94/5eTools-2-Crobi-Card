@@ -184,9 +184,14 @@ def getEntries(jsonSpell):
     lines = []
     for entry in jsonSpell["entries"]:
         if type(entry) is str:
-            lines += [removeToolCommonMacros(entry)]
+            entry = removeToolScaleMacro(entry)
+            lines += ["text | " + removeToolCommonMacros(entry)]
+        elif entry["type"] == "list":
+            for item in entry["items"]:
+                item = removeToolScaleMacro(item)
+                lines += ["bullet | " + removeToolCommonMacros(item)]
         else:
-            lines += ["Refer to book for full details."]
+            lines += ["text | Refer to book for full details."]
 
     return lines
 
@@ -197,9 +202,13 @@ def getHigherLevel(jsonSpell):
             for entry in hl["entries"]:
                 if type(entry) is str:
                     entry = removeToolScaleMacro(entry)
-                    lines += [removeToolCommonMacros(entry)]
+                    lines += ["text | " + removeToolCommonMacros(entry)]
+                elif entry["type"] == "list":
+                    for item in entry["items"]:
+                        item = removeToolScaleMacro(item)
+                        lines += ["bullet | " + removeToolCommonMacros(item)]
                 else:
-                    lines += ["Refer to book for full details."]
+                    lines += ["text | Refer to book for full details."]
     return lines
 
 def getCasterLine(cArr):
@@ -324,7 +333,7 @@ class spell5:
 
         # add entry text
         for entry in self.entries:
-            data["contents"] += ["text | " + entry]
+            data["contents"] += [entry]
 
         # add higher level
         if self.higherLevel and len(self.higherLevel) > 0:
@@ -363,6 +372,9 @@ def main():
             useItemFolder = True
         elif arg in ["-u", "--useitemfolder"]:
             useItemFolder = True
+        elif arg in ["-l", "--list"]:
+            listKeys(sourceFolderName)
+            return
 
     # print source and item
     print("Source from folder <" + sourceFolderName + ">")
@@ -424,5 +436,35 @@ def saveSelectedSpellsAsCard(sourceFolderName, itemFileName, cardFileName):
     for ss in spellsToGet:
         if ss["found"] == False:
             print("unable to find data for " + ss["name"] + " from " + ss["source"])
+
+def listKeys(sourceFolderName):
+    keyList = []
+    for file in os.listdir("./" + sourceFolderName):
+        if file.endswith(".json") == False:
+            continue
+        print("reading " + file)
+        fileName = sourceFolderName + "/" + file
+        
+        with open(fileName, "r", encoding="utf8") as myfile:
+            data = json.load(myfile)
+
+            # get spells from data
+            if "spell" in data:
+                spells = data["spell"]
+                for spell in spells:
+                    for key in spell.keys():
+                        if key not in keyList:
+                            keyList += [key]
+            else:
+                print("ERROR: no spell data found in " + fileName)
+                continue
+
+    for key in keyList:
+        print(key)
+        
+
+
+
+
 
 main()

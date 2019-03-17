@@ -190,6 +190,14 @@ def getEntries(jsonSpell):
             for item in entry["items"]:
                 item = removeToolScaleMacro(item)
                 lines += ["bullet | " + removeToolCommonMacros(item)]
+        elif entry["type"] == "entries":
+            temp = "description | " + entry["name"] + " | "
+            items = []
+            for item in entry["entries"]:
+                item = removeToolScaleMacro(item)
+                items += [removeToolCommonMacros(item)]
+            temp += "<br>".join(items)
+            lines += [temp]
         else:
             lines += ["text | Refer to book for full details."]
 
@@ -207,6 +215,14 @@ def getHigherLevel(jsonSpell):
                     for item in entry["items"]:
                         item = removeToolScaleMacro(item)
                         lines += ["bullet | " + removeToolCommonMacros(item)]
+                elif entry["type"] == "entries":
+                    temp = "description | " + entry["name"] + " | "
+                    items = []
+                    for item in entry["entries"]:
+                        item = removeToolScaleMacro(item)
+                        items += [removeToolCommonMacros(item)]
+                    temp += "<br>".join(items)
+                    lines += [temp]
                 else:
                     lines += ["text | Refer to book for full details."]
     return lines
@@ -342,7 +358,7 @@ class spell5:
                 "section | At higher levels",
             ]
             for entry in self.higherLevel:
-                data["contents"] += ["text | " + entry]
+                data["contents"] += [entry]
         
         data["tags"] = ["spell"] + ["level " + self.level, self.school.lower()]
         for caster in self.casters:

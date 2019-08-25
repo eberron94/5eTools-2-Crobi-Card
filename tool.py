@@ -330,9 +330,10 @@ class spell5:
 
         # add header content
         data["count"] = 1
-        data["color"] = "DarkGray"
+        data["color"] = "IndianRed"
         data["title"] = self.name
         data["icon"] = "white-book-" + self.level
+        data["icon_back"] = "spell-" + self.school.lower()
 
         # add main content
         data["contents"] = [
